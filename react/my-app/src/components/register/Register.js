@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Register.css'; // Optional: For styling the counter
 import { Route, Router, useNavigate, withRouter } from 'react-router-dom';
 
@@ -7,6 +7,20 @@ function Register() {
     // Make API call to flask server including username and hashed password
     //Take API response and do the appropriate thing:
         // E.g. Wrong password or log them in
+
+    const [data, setData] = useState([{}])
+    useEffect(() => {
+        fetch("/hello").then(
+            res => res.json()
+        ).then(
+            data => {
+                setData(data)
+                console.log(data)
+            }
+        )
+    }, [])
+
+
     let navigate = useNavigate();
 return (
     <div className="Login">
