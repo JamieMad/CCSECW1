@@ -24,3 +24,7 @@ Notes: Using flaskAPI stuff:
 # Set Up
     flask --app api db init
     flask --app api run
+
+
+TODO:
+    Maybe make a class for API requests etc, e.g. call Rest.register(registrationData)
