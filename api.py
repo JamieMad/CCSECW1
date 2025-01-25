@@ -1,8 +1,9 @@
-from flask import Flask
-from flask_restx import Resource, Api, reqparse
+from flask import Flask, request, jsonify
+from flask_restx import Resource, Api, reqparse, fields
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS, cross_origin
+from dataclasses import dataclass
 
 app = Flask(__name__)
 api = Api(app)
@@ -17,11 +18,17 @@ db.init_app(app)
 
 cors = CORS(app, resources={r"/*": {"origins": "http://localhost:3000/*"}})
 
+@dataclass
 class User(db.Model): #Model for the DB
+
+    id: int
+    username: str
+    email: str
+
     __tablename__ = 'Users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=False, nullable=True)
+    email = db.Column(db.String(120), nullable=True)
     def __repr__(self): #Special test function to output to string
         return '<User %r>' % self.username
     
@@ -36,9 +43,9 @@ testUser = User(username='test', email='')
 class HelloWorld(Resource):
     def get(self):
         print(User.query.all())
-        return {'hello': User.query.all()}
+        #return {'hello': User.query.all()}
         
-    
+
 
 parser = reqparse.RequestParser()
 parser.add_argument('username', type=str, required=True, help='username')
@@ -46,7 +53,7 @@ parser.add_argument('password', type=str, required=True, help='password')
 
 
 
-@api.route('/register', methods=['POST'])
+@api.route('/postshit', methods=['POST'])
 class postShit(Resource):
     @api.doc(parser=parser)
     def post(username):
@@ -72,12 +79,26 @@ class postShit(Resource):
 
 #Register User
 #   Get post data
-#   Parse it into different args
-#   Check if user already exists???
+#   Check if user already exists??? TODO
 #   NewUser = User(username=Arg1, etc.)
 #   db.session.add(NewUser)
 #   db.session.commit()
 
+RegisterModel = api.model('RegisterModel', {
+    'username': fields.String,
+    'password': fields.String(required=True)
+})
+
+@api.route('/register', methods=['POST'])
+class register(Resource):
+    @api.expect(RegisterModel, validate=True) #When validating check errors aren't returned to users TODO
+    def post(username):
+        data = request.get_json()
+        newUser = User(username=data['username'],email=data['password'])
+        db.session.add(newUser)
+        db.session.commit()
+        result = db.session.execute(db.select(User))
+        print(result.all())
 #ADMIN:
 
 #Check Logs:
@@ -95,6 +116,18 @@ class postShit(Resource):
 #       Get the JSON (only send the changed bits?)
 #       Update the user table with the new info
 #       Commit the changes
+
+@api.route('/userdetails/<int:id>', methods=['GET','POST']) #TODO somehow need to protect this
+class getUserDetails(Resource):
+    def get(self, id):
+        userDetails = User.query.filter_by(id=id).all()
+        return jsonify(userDetails)
+        
+@api.route('/getallusers', methods=['GET']) #TODO remove this
+class getUserDetails(Resource):
+    def get(self):
+        userDetails = User.query.all()
+        return jsonify(userDetails)
 
 #Check Orders:
 #   TODO
