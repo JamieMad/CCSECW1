@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_restx import Resource, Api, reqparse, fields
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 from flask_migrate import Migrate
 from flask_cors import CORS, cross_origin
 from dataclasses import dataclass
@@ -18,23 +20,64 @@ db.init_app(app)
 
 cors = CORS(app, resources={r"/*": {"origins": "http://localhost:3000/*"}})
 
-@dataclass
+@dataclass #Used for verifying data and documentation
 class User(db.Model): #Model for the DB
 
-    id: int
+    id: int #sets the expected data types for when JSONified
     username: str
     email: str
 
-    __tablename__ = 'Users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), nullable=True)
+    __tablename__ = 'Users' #Set tablename
+    id: Mapped[int] = mapped_column(unique=True, primary_key=True)
+    username: Mapped[str] = mapped_column(unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(nullable=False)
+
     def __repr__(self): #Special test function to output to string
         return '<User %r>' % self.username
-    
-#TODO Initialise the database and fill with test data
 
-with app.app_context():
+@dataclass
+class Products(db.Model):
+    id : int
+    name : str
+    description : str
+    numberSold : int
+    cost : int #Stored in pence
+    owner : int
+
+    __tablename__ = 'Products'
+    id: Mapped[int] = mapped_column(primary_key=True, unique=True)
+    name: Mapped[str] = mapped_column(unique=True)
+    description: Mapped[str] = mapped_column(nullable=True)
+    numberSold: Mapped[int] = mapped_column(nullable=False)
+    cost: Mapped[int] = mapped_column(nullable=False)
+    owner: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+
+@dataclass
+class Orders(db.Model):
+    id : int
+    orderFulfilled : bool
+    customerID : int
+    sellerID : int
+
+    __tablename__ = 'Orders'
+    id: Mapped[int] = mapped_column(primary_key=True, unique=True)
+    orderFulfilled: Mapped[bool] = mapped_column(nullable=False)
+    customerID: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+    sellerID: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+
+@dataclass
+class ItemInOrder(db.Model):
+    orderID : int
+    productID : int
+    quantity : int
+
+    __tablename__ = 'item_in_order'
+    orderID : Mapped[int] = mapped_column(primary_key=True, nullable=False)
+    productID : Mapped[int] = mapped_column(primary_key=True, nullable=False)
+    quantity : Mapped[int] = mapped_column(nullable=False)
+
+with app.app_context():  #Initialise the database and fill with test data
+    db.drop_all() #TODO remove
     db.create_all()
 
 testUser = User(username='test', email='')
