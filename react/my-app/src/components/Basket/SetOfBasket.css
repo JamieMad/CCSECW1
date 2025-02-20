@@ -1,0 +1,5 @@
+.completeBasket {
+    display: flex;
+    flex-direction: column; /* stacks children vertically */
+    gap: 10px; /* optional: space between items */
+  }

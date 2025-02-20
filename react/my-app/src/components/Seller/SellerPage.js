@@ -3,13 +3,13 @@ import './Register.css'; // Optional: For styling the counter
 import { Route, Router, useNavigate, withRouter } from 'react-router-dom';
 
 
-function Register() {
+function SellerPage() {
     // Make API call to flask server including username and hashed password
     //Take API response and do the appropriate thing:
         // E.g. Wrong password or log them in
     let navigate = useNavigate();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const [name, setUsername] = useState("");
+    const [price, setPassword] = useState("");
 
     const handleSubmit = (event) => {
         event.preventDefault()
@@ -52,4 +52,4 @@ return (
     );
 }
 
-export default Register;
+export default SellerPage;

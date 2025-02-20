@@ -1,5 +1,11 @@
-.ProductCatalogue {
+.basket {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+}
+.basketImage{
+
+}
+.ProductDetails{
+
 }
