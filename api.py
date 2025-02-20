@@ -285,7 +285,7 @@ class addProduct(Resource):
         db.session.add(newProduct)
         db.session.commit()
         result = Products.query.filter_by(name=data['name']).all()
-        return jsonify(result)
+        return jsonify({"msg" : "Success", "object" : result})
 
 #Edit current product
 #   POST

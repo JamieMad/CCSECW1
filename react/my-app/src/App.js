@@ -5,6 +5,8 @@ import Home from './components/home/Home';
 import Register from './components/register/Register'
 import ProductPage from './components/products/productpage';
 import BasketPage from './components/Basket/BasketPage';
+import SellerPage from './components/Seller/SellerPage';
+import SellerProducts from './components/Seller/SellerProducts';
 
 let Token; //Figure out auth tokens
 
@@ -21,7 +23,10 @@ function App() {
             <Route path = "/register" element={<Register />}/>
             <Route path = "/product/:id" element={<ProductPage />}/>
             <Route path = "/basket" element={<BasketPage/>}/>
+            <Route path = "/seller" element={<SellerPage/>}/>
+            <Route path = "/seller/products" element={<SellerProducts/>}/>
           </Routes>
+
       </div>
     );
 }
