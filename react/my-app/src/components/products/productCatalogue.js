@@ -1,21 +1,36 @@
 import React, {useState} from "react";
 import './ProductCatalogue.css';
-import ProductTile from "./productTile";
+import RenderTile from "./productTile";
 
-function renderTile(current_item) {
+const {BuyerTile, SellerTile} = RenderTile()
+
+function renderBuyer(current_item) {
     console.log("rendertile product = " + JSON.stringify(current_item))
     return(
-        ProductTile(current_item)
+        BuyerTile(current_item) // Loads function that actually does the rendering
+    )
+}
+function renderSeller(current_item) {
+    console.log("rendertile product = " + JSON.stringify(current_item))
+    return(
+        SellerTile(current_item) // Loads function that actually does the rendering
     )
 }
 
-function ProductCatalogue(props) {
+function ProductCatalogue(props) { 
     let tiles = []
         console.log("props are " + JSON.stringify(props.products))
-        for (let i = 0; i < props.products.length; i++) {
+        for (let i = 0; i < props.products.length; i++) { // Goes through every item passed through
             const current_item = props.products[i];
             console.log("current item is" + JSON.stringify(current_item))
-            tiles.push(renderTile(current_item));
+            if (props.pageUser == 'Buyer'){
+                tiles.push(renderBuyer(current_item)); // Renders each item and adds them to the tiles array
+            }
+
+            else{
+                tiles.push(renderSeller(current_item));
+            }
+            
         }
     console.log(tiles)
     return tiles

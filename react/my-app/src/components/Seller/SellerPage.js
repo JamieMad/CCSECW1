@@ -1,11 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Route, Router, useNavigate, withRouter } from 'react-router-dom';
+import GetUserInfo from '../apiCalls/GetUserInfo';
 
 
 function SellerPage() {
-    // Make API call to flask server including username and hashed password
-    //Take API response and do the appropriate thing:
-        // E.g. Wrong password or log them in
+
+    const [user, setUser] = useState()
+
+    /* useEffect(() => {
+          function fetchData() {
+            let user = GetUserInfo()
+            if (user.role !== 'seller'){
+                alert("Not a seller")
+                navigate("/home")
+            }
+            else{
+                setUser(user)
+            }
+        }
+        fetchData();
+      }); */
+
+
     let navigate = useNavigate();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -28,13 +44,13 @@ function SellerPage() {
         }).then((res) =>
         res.json().then((response) => {
             if (response.msg !== "Success"){
-                console.log("AAAH")
+                console.log(response.msg)
             }
             else {
                 console.log("Product Added")
             }
         }))
-    } //TODO should then zero the values i think
+    }
 
 return (
     <div className='SellerWrapper'>
@@ -48,8 +64,7 @@ return (
                     <p>Cost:</p>
                     <input type="text" onChange={(event) => setCost(Number(event.target.value))}/>
                     <div>
-                        <button type="submit">Register</button>
-                        <button type="text" onClick={() => {navigate("/home");}}>Home</button>
+                        <button type="submit">Submit</button>
                     </div>
                 </form>
         </div>

@@ -2,7 +2,7 @@ import useBasket from "./useBasket";
 import "./BasketItem.css"
 
 function BasketItem(product){
-
+    console.log(product)
     const {  removeFromBasket } = useBasket();
     return(
         <div class="basket">

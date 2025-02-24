@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint, url_for
 from flask_restx import Resource, Api, reqparse, fields
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, ForeignKey
@@ -6,43 +6,65 @@ from sqlalchemy.orm import Mapped, mapped_column
 from flask_migrate import Migrate
 from flask_cors import CORS, cross_origin
 from dataclasses import dataclass
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required, current_user, set_access_cookies, get_jwt
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, get_jwt_identity, jwt_required, current_user, set_access_cookies, set_refresh_cookies, get_jwt, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from datetime import datetime, timedelta, timezone
 
 
 app = Flask(__name__)
-api = Api(app)
 
+api = Api(app, doc='/swagger')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydb.db'
 db = SQLAlchemy()
 
 app.config['JWT_SECRET_KEY'] = 'super-secret-key-please-make-it-longer-aaahhh'
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
-app.config["JWT_COOKIE_SECURE"] = False
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False # Only False while testing
+app.config["JWT_COOKIE_SECURE"] = False # Only false while in testing
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
 jwt = JWTManager(app)
 
 
-db.init_app(app)
-
 cors = CORS(app, resources={r"/*": {"origins": "http://localhost:3000/*"}})
 
+db.init_app(app)
+
+'''@app.before_request
+def protect_swagger_docs():
+    # Assuming your docs are served at '/swagger' and '/swagger.json'
+    if request.path.startswith('/swagger'):
+        # This will raise an error if JWT is missing or invalid.
+        try:
+            verify_jwt_in_request(optional=False)
+            jwt_data = get_jwt()
+                
+            # Check if "role" exists in the JWT claims and includes "admin"
+            role = jwt_data.get("role", [])
+            if "admin" not in role:
+                return jsonify({"msg": "Admins only"})
+
+        except Exception as e:
+            return jsonify({"msg": "Missing or invalid JWT"})'''
+
 @app.after_request
+@jwt_required
 def refresh_expiring_jwts(response):
     try:
-        exp_timestamp = get_jwt()["exp"]
-        now = datetime.now(timezone.utc)
-        target_timestamp = datetime.timestamp(now + timedelta(minutes=10))
-        if target_timestamp > exp_timestamp:
-            access_token = create_access_token(identity=get_jwt_identity())
-            set_access_cookies(response, access_token)
-        return response
+        print("aaaaaaa")
+        exp_timestamp = get_jwt()["exp"] # Find out when it expired
+        now = datetime.now(timezone.utc) # Get current time
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=10)) # Gets time 10 mins ahead
+        if target_timestamp > exp_timestamp: # If token is going to expire within 10 mins
+            access_token = create_access_token(identity=get_jwt_identity()) # Make a new access token for the same identity
+            set_access_cookies(response, access_token) # Set the access cookie to new token
+        return jsonify(response)
     except (RuntimeError, KeyError):
-        # Case where there is not a valid JWT. Just return the original response
-        return response
+        print("bbbbbbbb")
+        print(request.cookies)
+        # Case where there is not a valid JWT. Return 'Invalid JWT' message
+        return jsonify({"msg" : "Invalid JWT"})
 
 
 
@@ -109,21 +131,16 @@ with app.app_context():  #Initialise the database and fill with test data
 
 #testUser = User(username='test', email='')
 
-@api.route('/hello')
+'''@api.route('/hello')
 class HelloWorld(Resource):
     def get(self):
         return jsonify(request.cookies)
-        #return {'hello': User.query.all()}
+        #return {'hello': User.query.all()}'''
         
 
 
-parser = reqparse.RequestParser()
-parser.add_argument('username', type=str, required=True, help='username')
-parser.add_argument('password', type=str, required=True, help='password')
 
-
-
-@api.route('/postshit', methods=['POST'])
+'''@api.route('/postshit', methods=['POST']) # TODO REMOVE
 class postShit(Resource):
     @api.doc(parser=parser)
     def post(username):
@@ -131,12 +148,19 @@ class postShit(Resource):
         #db.session.add(testUser)
         #db.session.commit()
 
-        return 'Hello, ' + args['username']
+        return 'Hello, ' + args['username']'''
         
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
-    identity = jwt_data["sub"]
-    return User.query.filter_by(id=identity).first()
+    try:
+        print("getting user")
+        identity = jwt_data["sub"]
+        print("got identity")
+        return User.query.filter_by(id=identity).first()
+    except:
+        print("error")
+        return jsonify({"msg":"Failed lookup"})
+
 
 #LOGIN:
 
@@ -147,23 +171,33 @@ def user_lookup_callback(_jwt_header, jwt_data):
 #   return a login token
 
 LoginModel = api.model('LoginModel', {
-    'username': fields.String,
+    'username': fields.String(required=True),
     'password': fields.String(required=True)
 })
 
 @api.route('/login', methods=['POST'])
 class login(Resource):
-    @api.expect(LoginModel, validate=True) #When validating check errors aren't returned to users TODO
+    @api.expect(LoginModel, validate=True) #Ensure username and password is the only data in POST request
+    @jwt_required(optional=True)
     def post(self):
-        data = request.get_json()
-        user = User.query.filter_by(username=data['username']).first()
-        if user and check_password_hash(user.password, data["password"]):
-            access_token = create_access_token(identity=str(user.id))
-            response = jsonify({"msg": "Login Success"})
-            set_access_cookies(response, access_token)
-            return response
+        data = request.get_json() # Get inputted data
+        current_identity = get_jwt_identity()
+        if current_identity:
+            return jsonify({"msg":"Already Logged In"})
         else:
-            return jsonify({"msg": "login failed"})
+            try:
+                user = User.query.filter_by(username=data['username']).first() # Check if the username matches a user
+                if user and check_password_hash(user.password, data["password"]): # Compare inputted password against the hash
+                    access_token = create_access_token(identity=str(user.id)) # Set the access token
+                    refresh_token = create_refresh_token(identity=str(user.id)) # Set the refresh token
+                    response = jsonify({"msg": "Login Success"})
+                    set_access_cookies(response, access_token) # Sets the cookies
+                    set_refresh_cookies(response, refresh_token)
+                    return response
+                else:
+                    return jsonify({"msg": "Incorrect Credentials"})
+            except:
+                return jsonify({"msg":"Error"})
 
 #CheckLoginToken
 # TODO IDK how to
@@ -178,30 +212,29 @@ class login(Resource):
 #   db.session.commit()
 
 RegisterModel = api.model('RegisterModel', {
-    'username': fields.String,
+    'username': fields.String(required=True),
     'password': fields.String(required=True)
 })
 
 @api.route('/register', methods=['POST'])
 class register(Resource):
-    @api.expect(RegisterModel, validate=True) #When validating check errors aren't returned to users TODO
-    def post(username):
+    @api.expect(RegisterModel, validate=True) #Ensure username and password is the only data in POST request
+    def post(self):
         data = request.get_json()
-
-        checkUser = User.query.filter_by(username=data['username']).first()
-        if checkUser:
-            return jsonify({"msg": "User already exists"})
-
-        newUser = User(username=data['username'],password=generate_password_hash(data['password'], 'scrypt'), role="admin")
-        db.session.add(newUser)
-        db.session.commit()
-        result = User.query.filter_by(username=data['username'])
-        return jsonify({"msg": "Success"})
+        try:
+            checkUser = User.query.filter_by(username=data['username']).first() # Check for users with the same username
+            if checkUser:
+                return jsonify({"msg": "User already exists"})
+            #Create newUser object with the username and hash of the password, role is always user
+            newUser = User(username=data['username'],password=generate_password_hash(data['password'], 'scrypt'), role="user")
+            db.session.add(newUser) # Adds user to table
+            db.session.commit() # Makes the changes permanent
+            return jsonify({"msg": "Success"})
+        except:
+            return jsonify({"msg": "Error"})
 
 #ADMIN:
-
-#Check Logs:
-#   TODO - implement logging and figure out how its being stored
+#TODO Make user into seller
 
 #USER:
 
@@ -216,12 +249,9 @@ class register(Resource):
 #       Update the user table with the new info
 #       Commit the changes
 
-parser = api.parser()
-parser.add_argument('X-CSRF-TOKEN', location='headers')
 
-@api.route('/userdetails/<int:id>', methods=['GET']) #TODO Admin only
+@api.route('/userdetails/<int:id>', methods=['GET'])
 class getUserDetails(Resource):
-    @api.expect(parser)
     @jwt_required()
     def get(self, id):
         if current_user.role == "admin":
@@ -232,7 +262,7 @@ class getUserDetails(Resource):
 
 @api.route('/getallusers', methods=['GET']) #TODO remove this
 class getAllUsers(Resource):
-    @api.expect(parser)
+   # @api.expect(parser)
     @jwt_required()
     def get(self):
         if current_user.role == "admin":
@@ -258,9 +288,13 @@ class getOrders(Resource):
 #   Get all products with sellerID as the sellers one
 @api.route('/getsellerproducts/<int:id>', methods=['GET']) #id is the seller ID
 class getsellerproducts(Resource):
+    @jwt_required()
     def get(self, id):
-        products = Products.query.filter_by(owner=id).all()
-        return jsonify(products)
+        if current_user.role == "seller" and current_user.identity == id:
+            products = Products.query.filter_by(owner=id).all()
+            return jsonify(products)
+        else:
+           return jsonify({"msg" : "Unathorised"})
 
 #Sellers Report
 #   TODO
@@ -279,13 +313,23 @@ ProductModel = api.model('ProductModels', {
 @api.route('/addproduct', methods=['POST'])
 class addProduct(Resource):
     @api.expect(ProductModel, validate=True) #When validating check errors aren't returned to users TODO
+    @jwt_required
     def post(self):
-        data = request.get_json()
-        newProduct = Products(name=data['name'],description=data['description'],owner=data['seller'],cost=data['cost'],numberSold=0)
-        db.session.add(newProduct)
-        db.session.commit()
-        result = Products.query.filter_by(name=data['name']).all()
-        return jsonify({"msg" : "Success", "object" : result})
+        try:
+            if current_user.role == "seller": # Check 
+                try:
+                    data = request.get_json()
+                    newProduct = Products(name=data['name'],description=data['description'],owner=data['seller'],cost=data['cost'],numberSold=0)
+                    db.session.add(newProduct)
+                    db.session.commit()
+                    result = Products.query.filter_by(name=data['name']).all()
+                    return jsonify({"msg" : "Success", "object" : result})
+                except:
+                    return jsonify({"msg": "Product not added"})
+            else:
+                return jsonify({"msg" : "Unauthorised"})
+        except:
+            return jsonify({"msg": "Product not added"})
 
 #Edit current product
 #   POST
@@ -321,13 +365,22 @@ class getProducts(Resource):
     def get(self):
         products = Products.query.all()
         return jsonify({"msg": "Success", "products": products})
-    
+
+@api.route('/userinfo', methods=['GET'])
+class userInfo(Resource):
+    @jwt_required()
+    def get(self):
+        try:
+            user = current_user
+            return jsonify(user)
+        except:
+            return jsonify({"msg":"Failed"})
 
 
 #IMAGES
 
 
-#TODO change the model to actually be like an image
+'''#TODO change the model to actually be like an image
 ImageModel = api.model('ImageModel', {
     'filelocation': fields.String(required=True),
     })
@@ -342,7 +395,7 @@ class uploadImage(Resource):
         print(image)
         #with open("./funnyimage", 'wb') as file:
          #   file.write(image)
-        return jsonify({'msg': 'Success'})
+        return jsonify({'msg': 'Success'})'''
 
 
 if __name__ == '__main__':

@@ -21,7 +21,7 @@ function ProductPage() {
         setProduct(data);
       }
       fetchData();
-    });
+    }, [id]);
   
     // Show a loading state until product is available
     if (!product) {

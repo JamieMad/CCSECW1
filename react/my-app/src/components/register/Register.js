@@ -26,7 +26,7 @@ function Register() {
         }).then((res) =>
         res.json().then((response) => {
             if (response.msg !== "Success"){
-                console.log("AAAH")
+                console.log(response.msg)
             }
             else {
                 navigate("/home")

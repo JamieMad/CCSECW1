@@ -26,7 +26,7 @@ function Login() {
         }).then((res) =>
         res.json().then((response) => {
             if (response.msg !== "Login Success"){
-                console.log("AAAH")
+                alert(response.msg)
             }
             else {
                 navigate("/home")

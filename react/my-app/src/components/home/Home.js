@@ -15,11 +15,12 @@ function Home() {
       }
       fetchData();
   }, []);
+
     return(
       <div className="Home">
         <h1>Home Page</h1>
         <div className='ProductCatalogue'>
-          <ProductCatalogue products={products}/>
+          <ProductCatalogue products={products} pageUser={"Buyer"}/> {/* Runs the component that actually renders the products */}
         </div>
         <button type="text" onClick={() => navigate("/login")}> Login </button>
         </div>

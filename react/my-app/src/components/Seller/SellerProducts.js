@@ -10,7 +10,7 @@ function SellerProducts() {
   useEffect(() => {
       async function fetchData() {
           const data = await GetSellerProducts(1); // Fetch only the products array
-          console.log("Tdhe data is ", data)
+          console.log("The data is ", data)
           setProducts(data);
       }
       fetchData();
@@ -19,7 +19,7 @@ function SellerProducts() {
       <div className="Home">
         <h1>Home Page</h1>
         <div className='ProductCatalogue'>
-          <ProductCatalogue products={products}/>
+          <ProductCatalogue products={products} pageUser={"seller"}/>
         </div>
         <button type="text" onClick={() => navigate("/login")}> Login </button>
         </div>
