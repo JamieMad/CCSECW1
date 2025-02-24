@@ -156,7 +156,7 @@ def user_lookup_callback(_jwt_header, jwt_data):
         print("getting user")
         identity = jwt_data["sub"]
         print("got identity")
-        return User.query.filter_by(id=identity).first()
+        return jsonify({User.query.filter_by(id=identity).first()})
     except:
         print("error")
         return jsonify({"msg":"Failed lookup"})
@@ -188,8 +188,10 @@ class login(Resource):
             try:
                 user = User.query.filter_by(username=data['username']).first() # Check if the username matches a user
                 if user and check_password_hash(user.password, data["password"]): # Compare inputted password against the hash
-                    access_token = create_access_token(identity=str(user.id)) # Set the access token
-                    refresh_token = create_refresh_token(identity=str(user.id)) # Set the refresh token
+                    user = User.query.filter_by(username=data['username']).first()
+                    role = {"role" : str(user.role), "id" : user.id}
+                    access_token = create_access_token(identity=str(user.id), additional_claims=role) # Set the access token
+                    refresh_token = create_refresh_token(identity=str(user.id), additional_claims=role) # Set the refresh token
                     response = jsonify({"msg": "Login Success"})
                     set_access_cookies(response, access_token) # Sets the cookies
                     set_refresh_cookies(response, refresh_token)
@@ -254,22 +256,36 @@ class register(Resource):
 class getUserDetails(Resource):
     @jwt_required()
     def get(self, id):
-        if current_user.role == "admin":
+        role = get_jwt()
+        if role["role"] == "admin":
             userDetails = User.query.filter_by(id=id).all()
             return jsonify(userDetails)
         else:
             return jsonify({"msg":"Unauthorized"})
 
-@api.route('/getallusers', methods=['GET']) #TODO remove this
+@api.route('/getallusers', methods=['GET'])
 class getAllUsers(Resource):
-   # @api.expect(parser)
     @jwt_required()
     def get(self):
-        if current_user.role == "admin":
-            userDetails = User.query.all()
+        role = get_jwt()
+        if role["role"] == "admin": # check if user is admin
+            userDetails = User.query.all() # get all users
             return jsonify(userDetails)
         else:
             return jsonify({"msg": "Unauthorized"})
+        
+@api.route('/makeseller/<int:id>', methods=['GET'])
+class getAllUsers(Resource):
+    @jwt_required()
+    def get(self, id):
+        role = get_jwt()
+        if role["role"] == "admin": # check if user is admin
+            userDetails = User.query.filter_by(id=id).first() # get single user
+            userDetails.role = "seller"
+            return jsonify({"msg": "user is now seller"})
+        else:
+            return jsonify({"msg": "Unauthorized"})
+
 
 #Check Orders:
 #   Get all orders with customerID as the users
@@ -290,7 +306,8 @@ class getOrders(Resource):
 class getsellerproducts(Resource):
     @jwt_required()
     def get(self, id):
-        if current_user.role == "seller" and current_user.identity == id:
+        role = get_jwt()
+        if role["role"] == "seller" and current_user.identity == id:
             products = Products.query.filter_by(owner=id).all()
             return jsonify(products)
         else:
@@ -316,7 +333,8 @@ class addProduct(Resource):
     @jwt_required
     def post(self):
         try:
-            if current_user.role == "seller": # Check 
+            role = get_jwt()
+            if role["role"] == "seller": # Check 
                 try:
                     data = request.get_json()
                     newProduct = Products(name=data['name'],description=data['description'],owner=data['seller'],cost=data['cost'],numberSold=0)
@@ -371,8 +389,8 @@ class userInfo(Resource):
     @jwt_required()
     def get(self):
         try:
-            user = current_user
-            return jsonify(user)
+            user = get_jwt()
+            return jsonify({"role": user["role"], "id" : user["id"]})
         except:
             return jsonify({"msg":"Failed"})
 
