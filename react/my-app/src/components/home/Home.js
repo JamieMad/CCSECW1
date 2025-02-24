@@ -22,7 +22,6 @@ function Home() {
         <div className='ProductCatalogue'>
           <ProductCatalogue products={products} pageUser={"Buyer"}/> {/* Runs the component that actually renders the products */}
         </div>
-        <button type="text" onClick={() => navigate("/login")}> Login </button>
         </div>
       );
   }

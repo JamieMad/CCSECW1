@@ -43,7 +43,6 @@ function ProductPage() {
             Add to basket
           </button>
         </div>
-        <UploadAndDisplayImage></UploadAndDisplayImage>
       </div>
     );
   }
