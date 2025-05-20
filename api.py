@@ -8,6 +8,8 @@ from flask_cors import CORS, cross_origin
 from dataclasses import dataclass
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, get_jwt_identity, jwt_required, current_user, set_access_cookies, set_refresh_cookies, get_jwt, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
+import os
 
 from datetime import datetime, timedelta, timezone
 
@@ -19,7 +21,10 @@ api = Api(app, doc='/swagger')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydb.db'
 db = SQLAlchemy()
 
-app.config['JWT_SECRET_KEY'] = 'super-secret-key-please-make-it-longer-aaahhh'
+load_dotenv()
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+
+
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False # Only False while testing
 app.config["JWT_COOKIE_SECURE"] = False # Only false while in testing
