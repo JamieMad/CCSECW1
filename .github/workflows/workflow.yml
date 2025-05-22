@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ../react/my-app/Dockerfile.react  # or specify a context with a compose override
+          file: ./react/my-app/Dockerfile.react  # or specify a context with a compose override
           push: true
           tags: maddmich/ccse-react:latest
       -
