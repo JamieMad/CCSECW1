@@ -18,13 +18,9 @@ Notes: Using flaskAPI stuff:
         )
     }, [])
 
-    For some reason it does 2 requests
-
 
 # Set Up
-    flask --app api db init
+    Go to root directory
     flask --app api run
-
-
-TODO:
-    Maybe make a class for API requests etc, e.g. call Rest.register(registrationData)
+    Go to ./react/api
+    npm start
