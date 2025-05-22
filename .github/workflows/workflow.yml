@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ../Dockerfile.react  # or specify a context with a compose override
+          file: Dockerfile.react  # or specify a context with a compose override
           push: true
           tags: maddmich/ccse-react:latest
       -
@@ -32,6 +32,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ../Dockerfile.api
+          file: Dockerfile.api
           push: true
           tags: maddmich/ccse-flask:latest
