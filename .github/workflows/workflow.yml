@@ -6,7 +6,6 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       -
         name: Login to Docker Hub
