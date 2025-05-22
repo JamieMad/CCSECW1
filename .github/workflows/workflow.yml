@@ -20,15 +20,15 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       -
-        - name: Build and push service1
+        name: Build and push service1
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./react/my-app/Dockerfile.react  # or specify a context with a compose override
           push: true
           tags: maddmich/ccse-react:latest
-
-      - name: Build and push service2
+      -
+        name: Build and push service2
         uses: docker/build-push-action@v6
         with:
           context: .
