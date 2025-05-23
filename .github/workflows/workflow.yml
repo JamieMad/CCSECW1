@@ -18,7 +18,6 @@ jobs:
           python-version: 3.10.17
 
       - name: Install dependencies
-        working-directory: api  
         run: pip install -r requirements.txt
 
       - name: Test with pytest
