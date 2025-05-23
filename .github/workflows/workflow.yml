@@ -13,21 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.10.17
-
-      - name: Install dependencies
-        working-directory: ./api  
-        run: pip install -r requirements.txt
-
-      - name: Test with pytest
-        run: |
-          pip install pytest pytest-cov
-          pytest test_example.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
-
+      
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/python-3.10@master
         continue-on-error: true # To make sure that SARIF upload gets called
@@ -56,7 +42,7 @@ jobs:
         with:
           sarif_file: snyk.sarif
   docker:
-    needs: [flask-security, react-security]
+    needs: [pytest_flask-security, react-security]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
