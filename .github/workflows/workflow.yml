@@ -9,7 +9,7 @@ permissions:
   actions: read
 
 jobs:
-  pytest+flask-security:
+  pytest_flask-security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
