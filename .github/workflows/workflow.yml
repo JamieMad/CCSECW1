@@ -9,7 +9,7 @@ permissions:
   actions: read
 
 jobs:
-  flask-security:
+  pytest+flask-security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         working-directory: ./api  
         run: pip install -r requirements.txt
+
+      - name: Test with pytest
+        run: |
+          pip install pytest pytest-cov
+          pytest test_example.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
 
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/python-3.10@master
