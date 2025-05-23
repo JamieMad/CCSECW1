@@ -12,12 +12,15 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.10.17
 
       - name: Install dependencies
+        working-directory: api
         run: pip install -r requirements.txt
 
       - name: Test with pytest
