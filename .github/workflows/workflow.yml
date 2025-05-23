@@ -51,8 +51,7 @@ jobs:
         with:
           sarif_file: snyk.sarif
   docker:
-    needs: flask-security
-    needs: react-security
+    needs: [flask-security, react-security]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
