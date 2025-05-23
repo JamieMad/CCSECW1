@@ -18,8 +18,3 @@ def test_non_existent(client):
     """Test a non-existant route."""
     response = client.get('/jabawoky')
     assert response.status_code == 404
-
-def test_always_fails(client):
-    """Test that should always fail."""
-    response = client.get('/jabawoky')
-    assert response.status_code == 202
