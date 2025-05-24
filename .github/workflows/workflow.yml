@@ -1,11 +1,16 @@
-name: CI
+name: CI/CD
 
-on: [push, workflow_call]
+on:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
   security-events: write
   actions: read
+  contents: 'read'
+  packages: 'write'
 
 jobs:
   pytest:
@@ -95,3 +100,16 @@ jobs:
           file: ./Dockerfile.api
           push: true
           tags: maddmich/ccse-flask:latest
+  depoly:
+    needs: [CI]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          images: |
+            docker.io/maddmich/ccse-react:latest
+            docker.io/maddmich/ccse-flask:latest
