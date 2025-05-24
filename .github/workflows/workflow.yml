@@ -9,6 +9,7 @@ permissions:
   contents: read
   security-events: write
   actions: read
+  issues: write
 
 jobs:
   pytest:
