@@ -99,7 +99,7 @@ jobs:
           file: ./Dockerfile.api
           push: true
           tags: maddmich/ccse-flask:latest
-  depoly:
+  deploy:
     needs: [docker]
     runs-on: ubuntu-latest
     steps:
@@ -119,6 +119,7 @@ jobs:
             --multicontainer-config-type compose \
             --multicontainer-config-file docker-compose.yml
   zap_dast_test:
+    needs: deploy
     steps:
 
   - name: ZAP Scan
