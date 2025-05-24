@@ -105,14 +105,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+
+      - name: Log in to Azure
+        uses: azure/login@v1
         with:
-          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: |
-            docker.io/maddmich/ccse-react:latest
-            docker.io/maddmich/ccse-flask:latest
-          configuration-file: docker-compose.yml
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Docker Compose to Azure Web App
+        run: |
+          az webapp config container set \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --multicontainer-config-type compose \
+            --multicontainer-config-file docker-compose.yml
+
+            
