@@ -7,7 +7,7 @@ function Banner() {
 
     return(
         <div className="Banner">
-            <h1>Ecommerce</h1>
+            <h1>Fucking</h1>
             <button type="text" onClick={() => navigate(`/register`)}> Register </button>
             <button type="text" onClick={() => navigate(`/login`)}> Log in </button>
             <button type="text" onClick={() => navigate(`/logout`)}> Log out </button>
