@@ -9,8 +9,7 @@ permissions:
   contents: read
   security-events: write
   actions: read
-  contents: 'read'
-  packages: 'write'
+  packages: write
 
 jobs:
   pytest:
