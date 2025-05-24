@@ -119,7 +119,7 @@ jobs:
             --multicontainer-config-type compose \
             --multicontainer-config-file docker-compose.yml
   zap_dast_test:
-    needs: deploy
+    needs: [deploy]
     steps:
 
   - name: ZAP Scan
