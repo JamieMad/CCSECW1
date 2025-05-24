@@ -119,6 +119,7 @@ jobs:
             --multicontainer-config-file docker-compose.yml
   zap_dast_test:
     needs: [deploy]
+    runs-on: ubuntu-latest
     steps:
 
       - name: ZAP Scan
