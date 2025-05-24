@@ -1,7 +1,6 @@
-name: Docker Build and Push
+name: CI
 
-on:
-  push:
+on: [push, workflow_call]
 
 permissions:
   contents: read
