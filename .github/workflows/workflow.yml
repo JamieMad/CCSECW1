@@ -112,3 +112,4 @@ jobs:
           images: |
             docker.io/maddmich/ccse-react:latest
             docker.io/maddmich/ccse-flask:latest
+          configuration-file: docker-compose.yml
