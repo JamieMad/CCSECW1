@@ -100,7 +100,7 @@ jobs:
           push: true
           tags: maddmich/ccse-flask:latest
   depoly:
-    needs: [CI]
+    needs: [docker]
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Azure Web App
