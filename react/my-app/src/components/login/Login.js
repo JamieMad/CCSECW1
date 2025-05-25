@@ -13,7 +13,7 @@ function Login() {
     
         const handleSubmit = (event) => {
             event.preventDefault()
-            fetch('http://balls/login', {
+            fetch('http://api:5000/login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
