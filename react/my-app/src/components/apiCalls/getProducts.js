@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 async function GetProducts() {
     try {
-        const response = await fetch("http://api:5000/getproducts", {
+        const response = await fetch("https://api:5000/getproducts", {
             method: "GET",
             headers: {
                 "Accept": "application/json",
