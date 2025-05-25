@@ -13,7 +13,7 @@ function Login() {
     
         const handleSubmit = (event) => {
             event.preventDefault()
-            fetch('https://api:5000/login', {
+            fetch('/api/login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
