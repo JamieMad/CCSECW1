@@ -29,7 +29,7 @@ function SellerPage() {
 
     const handleSubmit = (event) => {
         event.preventDefault()
-        fetch('http://localhost:5000/addproduct', {
+        fetch('/api/addproduct', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

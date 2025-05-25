@@ -1,6 +1,6 @@
 async function GetUserInfo() {
     try {
-        const response = await fetch(`http://localhost:5000/userinfo`, {
+        const response = await fetch(`/api/userinfo`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",

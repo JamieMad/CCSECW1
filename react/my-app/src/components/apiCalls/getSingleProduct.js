@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 async function GetSingleProduct(id) {
     console.log("in function")
     try {
-        const response = await fetch(`http://localhost:5000/getsingleproduct/${id}`, {
+        const response = await fetch(`/api/getsingleproduct/${id}`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",

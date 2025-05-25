@@ -1,6 +1,6 @@
 async function GetSellerProducts(id) {
     try {
-        const response = await fetch(`http://localhost:5000/getsellerproducts/${id}`, {
+        const response = await fetch(`/api/getsellerproducts/${id}`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",

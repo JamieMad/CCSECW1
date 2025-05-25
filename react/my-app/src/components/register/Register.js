@@ -13,7 +13,7 @@ function Register() {
 
     const handleSubmit = (event) => {
         event.preventDefault()
-        fetch('http://localhost:5000/register', {
+        fetch('/api/register', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

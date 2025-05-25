@@ -12,7 +12,7 @@ const UploadAndDisplayImage = () => {
       console.log(file)
       try {
         // You can write the URL of your server or any other endpoint used for file upload
-        const result = await fetch('http://127.0.0.1:5000/uploadimage', {
+        const result = await fetch('/api/uploadimage', {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
