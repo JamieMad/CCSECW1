@@ -32,7 +32,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
 jwt = JWTManager(app)
 
 
-cors = CORS(app, resources={r"/*": {"origins": "http://https://ccse-gjcrbsexd6bhaheb.canadacentral-01.azurewebsites.net/*"}})
+cors = CORS(app, resources={r"/*": {"origins": "https://ccse-gjcrbsexd6bhaheb.canadacentral-01.azurewebsites.net/*"}})
 
 db.init_app(app)
 
